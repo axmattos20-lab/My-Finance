@@ -121,7 +121,7 @@
                         <select id="monthSelect" onchange="changeGlobalMonth(this.value)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1 text-sm font-semibold text-indigo-600 dark:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                             <option value="JANUARY">Janeiro</option>
                             <option value="FEBRUARY">Fevereiro</option>
-                            <option value="MARCH" selected>Março</option>
+                            <option value="MARCH">Março</option>
                             <option value="APRIL">Abril</option>
                             <option value="MAY">Maio</option>
                             <option value="JUNE">Junho</option>
@@ -391,7 +391,11 @@
     </div>
 
     <script>
-        let currentMonth = "MARCH";
+        // Mapeamento de meses e descoberta inteligente do mês atual da máquina (2026)
+        const monthKeys = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+        const currentSystemMonthIdx = new Date().getMonth();
+        let currentMonth = monthKeys[currentSystemMonthIdx]; 
+
         let isSidebarCollapsed = false;
         let isDropdownOpen = false;
         let selectedPriorityForm = 2;
@@ -415,8 +419,7 @@
             if (saved) {
                 monthlyData = JSON.parse(saved);
             } else {
-                const allMonths = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-                allMonths.forEach(m => {
+                monthKeys.forEach(m => {
                     monthlyData[m] = {
                         received: m === "MARCH" ? 7300.00 : 7500.00,
                         items: JSON.parse(JSON.stringify(baseRecurrentItems)),
@@ -442,6 +445,10 @@
                 container.classList.add('opacity-100');
                 
                 loadStateFromStorage();
+                
+                // Sincroniza o componente select visual do topo com o mês vigente determinado automaticamente
+                document.getElementById('monthSelect').value = currentMonth;
+
                 syncThemeUI();
                 updateDashboard(currentMonth);
                 setPriorityForm(2);
@@ -486,6 +493,7 @@
             selectedPriorityForm = level;
             [1, 2, 3].forEach(i => {
                 const btn = document.getElementById(`prioBtn-${i}`);
+                if (!btn) return;
                 btn.className = "py-2 text-xs font-bold rounded-lg border text-center transition-colors cursor-pointer ";
                 if(i === level) {
                     if(level === 1) btn.className += "bg-rose-500 text-white border-rose-500";
@@ -516,6 +524,26 @@
             document.getElementById('modalRecebimentoBtn').innerText = "Atualizar Lançamento";
         }
 
+        // Nova funcionalidade: Duplicar Recebimento
+        function duplicateIncome(id) {
+            const inc = monthlyData[currentMonth].customIncomes.find(i => i.id === id);
+            if (!inc) return;
+
+            openModal('modalRecebimento');
+            
+            const year = new Date().getFullYear();
+            const monthIndexes = {"JANUARY":"01","FEBRUARY":"02","MARCH":"03","APRIL":"04","MAY":"05","JUNE":"06","JULY":"07","AUGUST":"08","SEPTEMBER":"09","OCTOBER":"10","NOVEMBER":"11","DECEMBER":"12"};
+            const dayStr = String(inc.day).padStart(2, '0');
+
+            document.getElementById('modalIncId').value = ""; // Vazio para criar novo registro
+            document.getElementById('modalIncDesc').value = inc.desc + " (Cópia)";
+            document.getElementById('modalIncVal').value = inc.val;
+            document.getElementById('modalIncDate').value = `${year}-${monthIndexes[currentMonth]}-${dayStr}`;
+            
+            document.getElementById('modalRecebimentoTitle').innerText = "Duplicar Recebível";
+            document.getElementById('modalRecebimentoBtn').innerText = "Salvar Cópia";
+        }
+
         function editBill(id) {
             const item = monthlyData[currentMonth].items.find(i => i.id === id);
             if (!item) return;
@@ -533,6 +561,27 @@
             
             document.getElementById('modalPagamentoTitle').innerText = "Alterar Pagamento";
             document.getElementById('modalPagamentoBtn').innerText = "Atualizar Lançamento";
+            setPriorityForm(item.priority || 2);
+        }
+
+        // Nova funcionalidade: Duplicar Pagamento
+        function duplicateBill(id) {
+            const item = monthlyData[currentMonth].items.find(i => i.id === id);
+            if (!item) return;
+
+            openModal('modalPagamento');
+
+            const year = new Date().getFullYear();
+            const monthIndexes = {"JANUARY":"01","FEBRUARY":"02","MARCH":"03","APRIL":"04","MAY":"05","JUNE":"06","JULY":"07","AUGUST":"08","SEPTEMBER":"09","OCTOBER":"10","NOVEMBER":"11","DECEMBER":"12"};
+            const dayStr = String(item.dueDay).padStart(2, '0');
+
+            document.getElementById('modalBillId').value = ""; // Vazio para criar novo registro
+            document.getElementById('modalBillDesc').value = item.name + " (Cópia)";
+            document.getElementById('modalBillVal').value = item.val;
+            document.getElementById('modalBillDate').value = `${year}-${monthIndexes[currentMonth]}-${dayStr}`;
+            
+            document.getElementById('modalPagamentoTitle').innerText = "Duplicar Pagamento";
+            document.getElementById('modalPagamentoBtn').innerText = "Salvar Cópia";
             setPriorityForm(item.priority || 2);
         }
 
@@ -554,7 +603,6 @@
                     return inc;
                 });
                 
-                // Re-sincronizar alteração nos meses futuros se for um registro recorrente
                 const alterado = monthlyData[currentMonth].customIncomes.find(i => i.id === idExistente);
                 if (alterado && alterado.isRecurrent) {
                     propagateIncomeRecurrence(alterado);
@@ -617,11 +665,10 @@
         }
 
         function propagateIncomeRecurrence(incomeItem) {
-            const monthsArray = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-            const startIdx = monthsArray.indexOf(currentMonth) + 1;
+            const startIdx = monthKeys.indexOf(currentMonth) + 1;
 
-            for (let i = startIdx; i < monthsArray.length; i++) {
-                const targetMonth = monthsArray[i];
+            for (let i = startIdx; i < monthKeys.length; i++) {
+                const targetMonth = monthKeys[i];
                 monthlyData[targetMonth].customIncomes = monthlyData[targetMonth].customIncomes.filter(inc => inc.desc !== incomeItem.desc && inc.id !== incomeItem.id);
                 monthlyData[targetMonth].customIncomes.push({
                     ...incomeItem,
@@ -630,7 +677,6 @@
             }
         }
 
-        // Nova funcionalidade: Alternância de Recorrência de Contas (Pagamentos)
         function toggleBillRecurrence(billId, isChecked) {
             monthlyData[currentMonth].items = monthlyData[currentMonth].items.map(item => {
                 if (item.id === billId) item.isRecurrent = isChecked;
@@ -647,14 +693,11 @@
         }
 
         function propagateBillRecurrence(billItem) {
-            const monthsArray = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-            const startIdx = monthsArray.indexOf(currentMonth) + 1;
+            const startIdx = monthKeys.indexOf(currentMonth) + 1;
 
-            for (let i = startIdx; i < monthsArray.length; i++) {
-                const targetMonth = monthsArray[i];
-                // Remove registro antigo com mesmo nome ou ID base para atualizar
+            for (let i = startIdx; i < monthKeys.length; i++) {
+                const targetMonth = monthKeys[i];
                 monthlyData[targetMonth].items = monthlyData[targetMonth].items.filter(item => item.name !== billItem.name && item.id !== billItem.id);
-                // Adiciona o clone atualizado da conta nos meses seguintes
                 monthlyData[targetMonth].items.push({
                     ...billItem,
                     id: "bill_rec_" + targetMonth + "_" + billItem.id.split('_').pop()
@@ -877,7 +920,7 @@
 
             document.getElementById('itemCount').innerText = `${data.items.length} Contas`;
 
-            // Renderizar Recebimentos
+            // Renderizar Recebimentos com botões Alterar e Duplicar
             const tableRecebimentos = document.getElementById('recebimentosListTable');
             tableRecebimentos.innerHTML = "";
             data.customIncomes.forEach(inc => {
@@ -893,15 +936,16 @@
                             <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-500"></div>
                         </label>
                     </td>
-                    <td class="py-3 px-6 text-center space-x-3">
+                    <td class="py-3 px-6 text-center space-x-2">
                         <button onclick="editIncome('${inc.id}')" class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold cursor-pointer">Alterar</button>
+                        <button onclick="duplicateIncome('${inc.id}')" class="text-xs text-amber-500 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-semibold cursor-pointer">Duplicar</button>
                         <button onclick="deleteIncome('${inc.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-semibold cursor-pointer">Excluir</button>
                     </td>
                 `;
                 tableRecebimentos.appendChild(row);
             });
 
-            // Renderizar Pagamentos com novo Switch de Recorrência incluído
+            // Renderizar Pagamentos com botões Alterar e Duplicar
             const tablePagamentos = document.getElementById('pagamentosListTable');
             tablePagamentos.innerHTML = "";
             data.items.forEach(item => {
@@ -924,8 +968,9 @@
                             <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-rose-500"></div>
                         </label>
                     </td>
-                    <td class="py-3 px-6 text-center space-x-3">
+                    <td class="py-3 px-6 text-center space-x-2">
                         <button onclick="editBill('${item.id}')" class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold cursor-pointer">Alterar</button>
+                        <button onclick="duplicateBill('${item.id}')" class="text-xs text-amber-500 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-semibold cursor-pointer">Duplicar</button>
                         <button onclick="deleteBill('${item.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-semibold cursor-pointer">Excluir</button>
                     </td>
                 `;
