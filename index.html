@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Pessoal 2026</title>
+    <title>My Finance</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
@@ -15,308 +15,416 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen antialiased">
 
-    <!-- Top Navigation / Header -->
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-600/30">
+    <!-- Screen 1: Privacy Login Overlay -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-950 flex items-center justify-center z-[100] transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6 mx-4">
+            <div class="text-center space-y-2">
+                <div class="inline-flex p-3 bg-indigo-600/10 text-indigo-400 rounded-xl mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-dasharray="" />
                     </svg>
                 </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight">Controle Pessoal</h1>
-                    <p class="text-xs text-slate-400">Planejamento e Finanças • 2026</p>
-                </div>
+                <h2 class="text-2xl font-bold tracking-tight text-white">Acesso Restrito</h2>
+                <p class="text-sm text-slate-400">Insira sua senha de acesso para visualizar o My Finance.</p>
             </div>
-            
-            <!-- Month Selector -->
-            <div class="flex items-center gap-2 bg-slate-800 p-1.5 rounded-xl border border-slate-700">
-                <label for="monthSelect" class="text-xs font-medium px-2 text-slate-400 uppercase tracking-wider">Mês:</label>
-                <select id="monthSelect" onchange="updateDashboard(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-sm font-semibold text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                    <option value="JANUARY">Janeiro</option>
-                    <option value="FEBRUARY">Fevereiro</option>
-                    <option value="MARCH" selected>Março</option>
-                    <option value="APRIL">Abril</option>
-                    <option value="MAY">Maio</option>
-                    <option value="JUNE">Junho</option>
-                </select>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Senha de Segurança</label>
+                    <input type="password" id="accessPassword" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-colors">
+                </div>
+                <p id="loginError" class="text-xs text-rose-400 hidden text-center">Senha incorreta. Tente novamente.</p>
+                <button onclick="checkAccess()" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm rounded-xl transition-colors cursor-pointer shadow-lg shadow-indigo-600/20">
+                    Desbloquear Painel
+                </button>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <!-- Main Application Container (Hidden until Login) -->
+    <div id="appContainer" class="opacity-0 transition-opacity duration-500 pointer-events-none">
         
-        <!-- Summary Dashboard Widgets -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Widget: Received -->
-            <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
-                <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Entradas (Received)</p>
-                        <h3 id="totalReceived" class="text-3xl font-bold mt-2 text-emerald-400">R$ 0,00</h3>
-                    </div>
-                    <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        <!-- Top Navigation / Header -->
+        <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+            <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-600/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                </div>
-            </div>
-
-            <!-- Widget: Bills -->
-            <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
-                <div class="absolute top-0 left-0 w-2 h-full bg-rose-500"></div>
-                <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saídas (Total Bills)</p>
-                        <h3 id="totalBills" class="text-3xl font-bold mt-2 text-rose-400">R$ 0,00</h3>
-                    </div>
-                    <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" />
-                        </svg>
+                        <h1 class="text-xl font-bold tracking-tight text-white">My Finance</h1>
+                        <p class="text-xs text-slate-400">Planejamento e Finanças • 2026</p>
                     </div>
                 </div>
+                
+                <!-- Month Selector (12 Months Liberated) -->
+                <div class="flex items-center gap-2 bg-slate-800 p-1.5 rounded-xl border border-slate-700">
+                    <label for="monthSelect" class="text-xs font-medium px-2 text-slate-400 uppercase tracking-wider">Mês:</label>
+                    <select id="monthSelect" onchange="updateDashboard(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-sm font-semibold text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                        <option value="JANUARY">Janeiro</option>
+                        <option value="FEBRUARY">Fevereiro</option>
+                        <option value="MARCH" selected>Março</option>
+                        <option value="APRIL">Abril</option>
+                        <option value="MAY">Maio</option>
+                        <option value="JUNE">Junho</option>
+                        <option value="JULY">Julho</option>
+                        <option value="AUGUST">Agosto</option>
+                        <option value="SEPTEMBER">Setembro</option>
+                        <option value="OCTOBER">Outubro</option>
+                        <option value="NOVEMBER">Novembro</option>
+                        <option value="DECEMBER">Dezembro</option>
+                    </select>
+                </div>
             </div>
+        </header>
 
-            <!-- Widget: Balance -->
-            <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
-                <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saldo Mensal</p>
-                        <h3 id="monthlyBalance" class="text-3xl font-bold mt-2 text-indigo-400">R$ 0,00</h3>
+        <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+            
+            <!-- Summary Dashboard Widgets -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Widget: Received -->
+                <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Entradas do Mês</p>
+                            <h3 id="totalReceived" class="text-3xl font-bold mt-2 text-emerald-400">R$ 0,00</h3>
+                        </div>
+                        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
                     </div>
-                    <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </div>
+
+                <!-- Widget: Bills -->
+                <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-rose-500"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saídas Mapeadas</p>
+                            <h3 id="totalBills" class="text-3xl font-bold mt-2 text-rose-400">R$ 0,00</h3>
+                        </div>
+                        <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget: Balance -->
+                <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saldo Líquido</p>
+                            <h3 id="monthlyBalance" class="text-3xl font-bold mt-2 text-indigo-400">R$ 0,00</h3>
+                        </div>
+                        <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Main Layout Split -->
+        <!-- New Feature Zone: Income Menu & Cashflow Advisor -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left & Center columns: Bills Breakdown Table -->
-            <div class="lg:col-span-2 bg-slate-800/30 border border-slate-800/80 rounded-2xl overflow-hidden backdrop-blur-sm">
-                <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+            
+            <!-- Form Menu: Recebíveis do Mês -->
+            <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 space-y-4">
+                <div class="border-b border-slate-800 pb-3">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Menu de Recebíveis
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Registre entradas e datas de liquidação</p>
+                </div>
+                <div class="space-y-3">
                     <div>
-                        <h2 class="text-lg font-bold">Detalhamento das Contas</h2>
-                        <p class="text-xs text-slate-400">Valores extraídos diretamente da planilha oficial 2026</p>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Descrição do Recebível</label>
+                        <input type="text" id="incDesc" placeholder="Ex: Provento Gerência" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
                     </div>
-                    <span class="px-2.5 py-1 text-xs font-medium bg-slate-800 text-slate-300 rounded-full border border-slate-700" id="itemCount">9 Itens</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Valor (R$)</label>
+                            <input type="number" id="incVal" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Dia Útil / Data</label>
+                            <input type="number" id="incDay" placeholder="Ex: 5" min="1" max="31" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+                    <button onclick="addReceivable()" class="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg transition-colors cursor-pointer">
+                        Lançar Entrada
+                    </button>
                 </div>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-800/40 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
-                                <th class="py-4 px-6">Descrição</th>
-                                <th class="py-4 px-6 text-right">Valor Pago</th>
-                                <th class="py-4 px-6 text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="billsTableBody" class="divide-y divide-slate-850">
-                            <!-- Injected by JavaScript -->
-                        </tbody>
-                    </table>
+                <!-- Micro List of custom entered receivables -->
+                <div class="pt-2">
+                    <p class="text-xs font-semibold text-slate-400 mb-2">Cronograma de Depósitos:</p>
+                    <div id="receivablesList" class="space-y-1.5 text-xs">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Column: Interactive Quick Actions / Add simulator -->
-            <div class="space-y-6">
-                <!-- Quick Simulator Info Card -->
-                <div class="bg-indigo-950/30 border border-indigo-900/50 rounded-2xl p-6 relative overflow-hidden">
-                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-600/10 rounded-full blur-2xl"></div>
-                    <h3 class="text-md font-bold text-indigo-400 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Aplicação Web Independente
-                    </h3>
-                    <p class="text-sm text-slate-300 mt-3 leading-relaxed">
-                        Este aplicativo é totalmente estático e autônomo. Ele não possui banco de dados externo ou custos adicionais, garantindo velocidade total e <strong>100% de privacidade</strong>.
-                    </p>
-                    <div class="mt-4 pt-4 border-t border-indigo-900/40 grid grid-cols-2 gap-4 text-xs text-slate-400">
-                        <div>🚀 Hospedagem: <span class="text-slate-200 font-medium">Render / Free</span></div>
-                        <div>📦 Código: <span class="text-slate-200 font-medium">GitHub</span></div>
+            <!-- Smart Box: Sugestão Estratégica de Pagamentos -->
+            <div class="lg:col-span-2 bg-indigo-950/20 border border-indigo-900/40 rounded-2xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="border-b border-indigo-900/40 pb-3 flex justify-between items-center">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            Sugestões de Pagamento Inteligentes
+                        </h3>
+                        <span class="text-[10px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-full">Cashflow Engine</span>
+                    </div>
+                    
+                    <div id="suggestionBox" class="mt-4 space-y-3 text-sm text-slate-300">
+                        <!-- Generated on-the-fly dynamically mapping against due-dates -->
                     </div>
                 </div>
+                <p class="text-[11px] text-slate-500 mt-4 italic">As prioridades absolutas podem ser marcadas por você diretamente na lista de contas abaixo.</p>
+            </div>
+        </section>
 
-                <!-- Simulation Add Form (Visual Only for standalone client preference) -->
-                <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-6">
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Simular Novo Lançamento</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Descrição</label>
-                            <input type="text" placeholder="Ex: Materiais Obra" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Valor (R$)</label>
-                            <input type="number" placeholder="0,00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                        </div>
-                        <button onclick="alert('Funcionalidade de simulação local pronta no código final!')" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm rounded-lg transition-colors cursor-pointer shadow-lg shadow-indigo-600/20">
-                            Adicionar Lançamento
-                        </button>
-                    </div>
+        <!-- Recurrent Bills Layout Breakdown Table -->
+        <section class="bg-slate-800/30 border border-slate-800/80 rounded-2xl overflow-hidden backdrop-blur-sm">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Detalhamento das Contas Recorrentes</h2>
+                    <p class="text-xs text-slate-400">Previsões fixas replicadas automaticamente para todos os meses</p>
                 </div>
+                <span class="px-2.5 py-1 text-xs font-medium bg-slate-800 text-slate-300 rounded-full border border-slate-700" id="itemCount">9 Itens</span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/40 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                            <th class="py-4 px-6">Descrição</th>
+                            <th class="py-4 px-6 text-center">Vencimento Padrão</th>
+                            <th class="py-4 px-6 text-right">Valor Projetado</th>
+                            <th class="py-4 px-6 text-center">Status / Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billsTableBody" class="divide-y divide-slate-850">
+                        <!-- Injected by JavaScript -->
+                    </tbody>
+                </table>
             </div>
         </section>
     </main>
 
     <footer class="max-w-6xl mx-auto px-4 py-8 mt-12 border-t border-slate-800 text-center text-xs text-slate-500">
-        <p>© 2026 • Desenvolvido sob medida para Alexandre • Código Aberto no GitHub</p>
+        <p>© 2026 • My Finance • Desenvolvido sob medida para Alexandre • Código Aberto no GitHub</p>
     </footer>
 
-    <!-- Embedded Planilha 2026 Pure Data Matrix -->
+    </div>
+
+    <!-- Core App Engine and State Matrix -->
     <script>
-        const sheetData = {
-            "JANUARY": {
-                "received": 6370.00,
-                "items": [
-                    { name: "Financiamento", value: 1560.00, status: "Pago (19/11)" },
-                    { name: "Condomínio", value: 846.28, status: "Pago (10/11)" },
-                    { name: "Light", value: 112.74, status: "Pago (13/11)" },
-                    { name: "Net", value: 75.00, status: "Pago (10/09)" },
-                    { name: "Claro", value: 45.00, status: "Pago (10/09)" },
-                    { name: "TV", value: 30.00, status: "Pago (10/09)" },
-                    { name: "Caixa", value: 2098.94, status: "Pago (14/01)" },
-                    { name: "PicPay", value: 217.68, status: "Pago (14/11)" },
-                    { name: "C6", value: 392.91, status: "Pago (15/01)" }
-                ]
-            },
-            "FEBRUARY": {
-                "received": 8840.00,
-                "items": [
-                    { name: "Financiamento", value: 1550.00, status: "OK" },
-                    { name: "Condomínio", value: 870.00, status: "OK" },
-                    { name: "Light", value: 222.99, status: "OK" },
-                    { name: "Net", value: 75.00, status: "OK" },
-                    { name: "Claro", value: 45.00, status: "OK" },
-                    { name: "TV", value: 30.00, status: "OK" },
-                    { name: "Caixa", value: 2847.95, status: "OK" },
-                    { name: "PicPay", value: 492.89, status: "OK" },
-                    { name: "C6", value: 247.31, status: "OK" }
-                ]
-            },
-            "MARCH": {
-                "received": 7300.00,
-                "items": [
-                    { name: "Financiamento", value: 1565.00, status: "OK" },
-                    { name: "Condomínio", value: 885.00, status: "OK" },
-                    { name: "Light", value: 110.00, status: "OK" },
-                    { name: "Net", value: 75.00, status: "OK" },
-                    { name: "Claro", value: 45.00, status: "OK" },
-                    { name: "TV", value: 30.00, status: "Pago (13/03)" },
-                    { name: "Caixa", value: 2696.58, status: "Pago (14/03)" },
-                    { name: "PicPay", value: 59.27, status: "OK" },
-                    { name: "C6", value: 0.00, status: "OK" }
-                ]
-            },
-            "APRIL": {
-                "received": 7800.00,
-                "items": [
-                    { name: "Financiamento", value: 1580.00, status: "OK" },
-                    { name: "Condomínio", value: 880.00, status: "OK" },
-                    { name: "Light", value: 106.17, status: "OK" },
-                    { name: "Net", value: 75.00, status: "OK" },
-                    { name: "Claro", value: 45.00, status: "OK" },
-                    { name: "TV", value: 30.00, status: "OK" },
-                    { name: "Caixa", value: 3153.35, status: "OK" },
-                    { name: "PicPay", value: 91.72, status: "OK" },
-                    { name: "C6", value: 10.00, status: "OK" }
-                ]
-            },
-            "MAY": {
-                "received": 5750.00,
-                "items": [
-                    { name: "Financiamento", value: 0.00, status: "Pendente (→)" },
-                    { name: "Condomínio", value: 0.00, status: "Pendente (→)" },
-                    { name: "Light", value: 95.76, status: "OK" },
-                    { name: "Net", value: 76.57, status: "OK" },
-                    { name: "Claro", value: 45.91, status: "OK" },
-                    { name: "TV", value: 30.00, status: "OK" },
-                    { name: "Caixa", value: 2871.53, status: "OK" },
-                    { name: "PicPay Mínimo", value: 0.00, status: "OK" },
-                    { name: "C6", value: 0.00, status: "OK" }
-                ]
-            },
-            "JUNE": {
-                "received": 13107.00,
-                "items": [
-                    { name: "Financiamento", value: 1600.00, status: "Pago (30/06)" },
-                    { name: "Condomínio", value: 750.00, status: "Pago (30/06)" },
-                    { name: "Light", value: 120.00, status: "Pago (30/06)" },
-                    { name: "Net", value: 75.00, status: "OK" },
-                    { name: "Claro", value: 45.00, status: "OK" },
-                    { name: "TV", value: 30.00, status: "Pago (10/09)" },
-                    { name: "Caixa", value: 5483.58, status: "Pago (14/04)" },
-                    { name: "PicPay", value: 119.68, status: "OK" },
-                    { name: "C6", value: 0.00, status: "Pago (15/04)" }
-                ]
-            }
+        // Core Config & Memory Simulation (Persistent variables across state changes)
+        let currentMonth = "MARCH";
+        
+        // Base Recurrent matrix replicated for all months automatically
+        const baseRecurrentItems = [
+            { id: "fin", name: "Financiamento", dueDay: 19, val: 1565.00 },
+            { id: "cond", name: "Condomínio", dueDay: 10, val: 885.00 },
+            { id: "light", name: "Light", dueDay: 13, val: 115.00 },
+            { id: "net", name: "Net", dueDay: 10, val: 75.00 },
+            { id: "claro", name: "Claro", dueDay: 10, val: 45.00 },
+            { id: "tv", name: "TV", dueDay: 10, val: 30.00 },
+            { id: "caixa", name: "Caixa", dueDay: 14, val: 2696.58 },
+            { id: "picpay", name: "PicPay", dueDay: 14, val: 59.27 },
+            { id: "c6", name: "C6", dueDay: 15, val: 0.00 }
+        ];
+
+        // Unique structures for monthly overrides
+        const monthlyData = {
+            "JANUARY": { received: 6370.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Padrão", val: 6370, day: 5}] },
+            "FEBRUARY": { received: 8840.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Padrão", val: 8840, day: 5}] },
+            "MARCH": { received: 7300.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Gerência", val: 7300, day: 5}] },
+            "APRIL": { received: 7800.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Base", val: 7800, day: 5}] },
+            "MAY": { received: 5750.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Ajustado", val: 5750, day: 5}] },
+            "JUNE": { received: 13107.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento + Bônus", val: 13107, day: 5}] }
         };
+
+        // Initialize missing months from July to December cleanly with base templates
+        const allMonths = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+        allMonths.forEach(m => {
+            if(!monthlyData[m]) {
+                monthlyData[m] = {
+                    received: 7500.00, // standard base projection
+                    items: JSON.parse(JSON.stringify(baseRecurrentItems)),
+                    customIncomes: [{desc: "Provento Estimado", val: 7500, day: 5}]
+                };
+            }
+        });
+
+        // 1. Password Verification Logic (Local privacy guard)
+        function checkAccess() {
+            const pass = document.getElementById('accessPassword').value;
+            // Set simple secure local password for Alexandre (can easily be edited in code)
+            if (pass === "1234" || pass.toLowerCase() === "alexandre") {
+                document.getElementById('loginOverlay').classList.add('opacity-0', 'pointer-events-none');
+                const container = document.getElementById('appContainer');
+                container.classList.remove('pointer-events-none', 'opacity-0');
+                container.classList.add('opacity-100');
+                updateDashboard(currentMonth);
+            } else {
+                const err = document.getElementById('loginError');
+                err.classList.remove('hidden');
+            }
+        }
 
         function formatCurrency(value) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
         }
 
+        // 2 & 3. Add Custom Receivable Dynamic Engine
+        function addReceivable() {
+            const desc = document.getElementById('incDesc').value || "Nova Entrada";
+            const val = parseFloat(document.getElementById('incVal').value) || 0;
+            const day = parseInt(document.getElementById('incDay').value) || 5;
+
+            if(val <= 0) return alert("Por favor insira um valor válido.");
+
+            monthlyData[currentMonth].customIncomes.push({ desc, val, day });
+            
+            // Recompute dynamic total received for the active month
+            let totalRec = 0;
+            monthlyData[currentMonth].customIncomes.forEach(i => totalRec += i.val);
+            monthlyData[currentMonth].received = totalRec;
+
+            // Clear inputs
+            document.getElementById('incDesc').value = "";
+            document.getElementById('incVal').value = "";
+            document.getElementById('incDay').value = "";
+
+            updateDashboard(currentMonth);
+        }
+
+        // 3. Main Algorithmic Cashflow Advisor
+        function compilePaymentSuggestions(monthKey) {
+            const data = monthlyData[monthKey];
+            const suggestionBox = document.getElementById('suggestionBox');
+            suggestionBox.innerHTML = "";
+
+            if (!data.customIncomes || data.customIncomes.length === 0) {
+                suggestionBox.innerHTML = `<p class="text-xs text-slate-400">Nenhum recebível cadastrado para gerar o cronograma.</p>`;
+                return;
+            }
+
+            // Sort incomes by day
+            const sortedIncomes = [...data.customIncomes].sort((a,b) => a.day - b.day);
+            // Sort bills by due date
+            const sortedBills = [...data.items].sort((a,b) => a.dueDay - b.dueDay);
+
+            let html = `<ul class="space-y-3">`;
+
+            sortedIncomes.forEach(inc => {
+                // Find bills that mature AFTER or near this income day, but before the next income
+                const matchedBills = sortedBills.filter(b => b.dueDay >= inc.day && b.val > 0);
+                
+                html += `
+                    <li class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-200">
+                            <span class="text-emerald-400">💵 Recebimento: ${inc.desc} (Dia ${inc.day})</span>
+                            <span>Disponível: ${formatCurrency(inc.val)}</span>
+                        </div>
+                        <div class="mt-2 pl-3 border-l-2 border-indigo-500/40 space-y-1 text-xs text-slate-400">
+                `;
+
+                if(matchedBills.length > 0) {
+                    let allocated = 0;
+                    matchedBills.forEach(b => {
+                        if(allocated + b.val <= inc.val) {
+                            html += `<div>• Liquidar <strong class="text-slate-300">${b.name}</strong> até o vencimento em <span class="text-indigo-300">Dia ${b.dueDay}</span> (${formatCurrency(b.val)})</div>`;
+                            allocated += b.val;
+                        }
+                    });
+                } else {
+                    html += `<div class="text-slate-500 italic">Nenhum boleto vencendo imediatamente após este lote. Fundo de reserva livre.</div>`;
+                }
+
+                html += `</div></li>`;
+            });
+
+            html += `</ul>`;
+            suggestionBox.innerHTML = html;
+        }
+
+        // Render dashboard dynamically matching states
         function updateDashboard(monthKey) {
-            const data = sheetData[monthKey];
+            currentMonth = monthKey;
+            const data = monthlyData[monthKey];
             if (!data) return;
 
-            // Compute total bills
+            // Compute math metrics
             let totalBills = 0;
-            data.items.forEach(item => totalBills += item.value);
+            data.items.forEach(item => totalBills += item.val);
             const balance = data.received - totalBills;
 
-            // Update Widgets
+            // Paint Top Metrics Widgets
             document.getElementById('totalReceived').innerText = formatCurrency(data.received);
             document.getElementById('totalBills').innerText = formatCurrency(totalBills);
             
             const balanceEl = document.getElementById('monthlyBalance');
             balanceEl.innerText = formatCurrency(balance);
-            if (balance >= 0) {
-                balanceEl.className = "text-3xl font-bold mt-2 text-indigo-400";
-            } else {
-                balanceEl.className = "text-3xl font-bold mt-2 text-rose-400";
-            }
+            balanceEl.className = balance >= 0 ? "text-3xl font-bold mt-2 text-indigo-400" : "text-3xl font-bold mt-2 text-rose-400";
 
-            // Update Table
+            // Repopulate active custom receivables micro dashboard
+            const recListEl = document.getElementById('receivablesList');
+            recListEl.innerHTML = "";
+            data.customIncomes.forEach(inc => {
+                const d = document.createElement('div');
+                d.className = "flex justify-between text-slate-300 bg-slate-900/30 px-2 py-1 rounded border border-slate-800";
+                d.innerHTML = `<span>${inc.desc} (Dia ${inc.day})</span><span class="font-semibold text-emerald-400">${formatCurrency(inc.val)}</span>`;
+                recListEl.appendChild(d);
+            });
+
+            // Update Bills Breakdown Grid
             const tbody = document.getElementById('billsTableBody');
             tbody.innerHTML = "";
             
             data.items.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors";
+                tr.className = "border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors text-xs";
                 
-                const isZero = item.value === 0;
-                const statusClass = item.status.toLowerCase().includes('ok') || item.status.toLowerCase().includes('pago') 
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                    : "bg-amber-500/10 text-amber-400 border-amber-500/20";
+                const isZero = item.val === 0;
 
                 tr.innerHTML = `
-                    <td class="py-4 px-6 font-medium text-slate-200">${item.name}</td>
-                    <td class="py-4 px-6 text-right font-semibold ${isZero ? 'text-slate-500' : 'text-slate-300'}">${formatCurrency(item.value)}</td>
+                    <td class="py-4 px-6 font-medium text-slate-200 text-sm">${item.name}</td>
+                    <td class="py-4 px-6 text-center text-slate-400">Dia ${item.dueDay}</td>
+                    <td class="py-4 px-6 text-right font-semibold text-sm ${isZero ? 'text-slate-600' : 'text-slate-200'}">${formatCurrency(item.val)}</td>
                     <td class="py-4 px-6 text-center">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusClass}">
-                            ${item.status}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                            Mapeado
                         </span>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            document.getElementById('itemCount').innerText = `${data.items.length} Itens`;
+            document.getElementById('itemCount').innerText = `${data.items.length} Contas`;
+            
+            // Build dynamic flow calculation engine suggestion
+            compilePaymentSuggestions(monthKey);
         }
 
-        // Initial Load
-        window.onload = function() {
-            updateDashboard("MARCH");
-        };
+        // Setup simple keypress listener for login convenience
+        document.getElementById('accessPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAccess();
+        });
     </script>
 </body>
 </html>
