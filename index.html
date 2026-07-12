@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,29 +10,34 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
         }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen antialiased">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 min-h-screen antialiased flex">
 
-    <!-- Screen 1: Privacy Login Overlay -->
+    <!-- Tela de Bloqueio (Segurança) -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-950 flex items-center justify-center z-[100] transition-opacity duration-300">
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6 mx-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6 mx-4">
             <div class="text-center space-y-2">
-                <div class="inline-flex p-3 bg-indigo-600/10 text-indigo-400 rounded-xl mb-2">
+                <div class="inline-flex p-3 bg-indigo-600/10 text-indigo-500 rounded-xl mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-dasharray="" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold tracking-tight text-white">Acesso Restrito</h2>
-                <p class="text-sm text-slate-400">Insira sua senha de acesso para visualizar o My Finance.</p>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Acesso Restrito</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Insira sua senha de acesso para visualizar o My Finance.</p>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Senha de Segurança</label>
-                    <input type="password" id="accessPassword" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-colors">
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Senha de Segurança</label>
+                    <input type="password" id="accessPassword" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-colors">
                 </div>
-                <p id="loginError" class="text-xs text-rose-400 hidden text-center">Senha incorreta. Tente novamente.</p>
+                <p id="loginError" class="text-xs text-rose-500 hidden text-center">Senha incorreta. Tente novamente.</p>
                 <button onclick="checkAccess()" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm rounded-xl transition-colors cursor-pointer shadow-lg shadow-indigo-600/20">
                     Desbloquear Painel
                 </button>
@@ -40,202 +45,283 @@
         </div>
     </div>
 
-    <!-- Main Application Container (Hidden until Login) -->
-    <div id="appContainer" class="opacity-0 transition-opacity duration-500 pointer-events-none">
+    <!-- Estrutura Principal do Aplicativo -->
+    <div id="appContainer" class="opacity-0 transition-opacity duration-500 pointer-events-none flex w-full min-h-screen">
         
-        <!-- Top Navigation / Header -->
-        <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-            <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-600/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold tracking-tight text-white">My Finance</h1>
-                        <p class="text-xs text-slate-400">Planejamento e Finanças • 2026</p>
-                    </div>
-                </div>
-                
-                <!-- Month Selector (12 Months Liberated) -->
-                <div class="flex items-center gap-2 bg-slate-800 p-1.5 rounded-xl border border-slate-700">
-                    <label for="monthSelect" class="text-xs font-medium px-2 text-slate-400 uppercase tracking-wider">Mês:</label>
-                    <select id="monthSelect" onchange="updateDashboard(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-sm font-semibold text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                        <option value="JANUARY">Janeiro</option>
-                        <option value="FEBRUARY">Fevereiro</option>
-                        <option value="MARCH" selected>Março</option>
-                        <option value="APRIL">Abril</option>
-                        <option value="MAY">Maio</option>
-                        <option value="JUNE">Junho</option>
-                        <option value="JULY">Julho</option>
-                        <option value="AUGUST">Agosto</option>
-                        <option value="SEPTEMBER">Setembro</option>
-                        <option value="OCTOBER">Outubro</option>
-                        <option value="NOVEMBER">Novembro</option>
-                        <option value="DECEMBER">Dezembro</option>
-                    </select>
-                </div>
-            </div>
-        </header>
-
-        <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
-            
-            <!-- Summary Dashboard Widgets -->
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Widget: Received -->
-                <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Entradas do Mês</p>
-                            <h3 id="totalReceived" class="text-3xl font-bold mt-2 text-emerald-400">R$ 0,00</h3>
-                        </div>
-                        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
+        <!-- SIDEBAR RETRÁTIL -->
+        <aside id="sidebar" class="w-64 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-850 flex flex-col justify-between transition-all duration-300 z-40 shrink-0 relative">
+            <div class="flex flex-col">
+                <!-- Topo da Sidebar -->
+                <div class="p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-850">
+                    <div id="sidebarLogoZone" class="flex items-center gap-2.5 overflow-hidden transition-opacity duration-200">
+                        <div class="p-1.5 bg-indigo-600 rounded-lg text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
+                        <span class="font-bold tracking-tight text-slate-900 dark:text-white truncate text-base">My Finance</span>
                     </div>
-                </div>
-
-                <!-- Widget: Bills -->
-                <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-rose-500"></div>
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saídas Mapeadas</p>
-                            <h3 id="totalBills" class="text-3xl font-bold mt-2 text-rose-400">R$ 0,00</h3>
-                        </div>
-                        <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Widget: Balance -->
-                <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saldo Líquido</p>
-                            <h3 id="monthlyBalance" class="text-3xl font-bold mt-2 text-indigo-400">R$ 0,00</h3>
-                        </div>
-                        <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    <!-- Botão de Recolher -->
+                    <button onclick="toggleSidebar()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-500 dark:text-slate-400 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="sidebarCollapseIcon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                         </svg>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- New Feature Zone: Income Menu & Cashflow Advisor -->
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- Form Menu: Recebíveis do Mês -->
-            <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 space-y-4">
-                <div class="border-b border-slate-800 pb-3">
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Menu de Recebíveis
-                    </h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Registre entradas e datas de liquidação</p>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Descrição do Recebível</label>
-                        <input type="text" id="incDesc" placeholder="Ex: Provento Gerência" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Valor (R$)</label>
-                            <input type="number" id="incVal" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Dia Útil / Data</label>
-                            <input type="number" id="incDay" placeholder="Ex: 5" min="1" max="31" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                        </div>
-                    </div>
-                    <button onclick="addReceivable()" class="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg transition-colors cursor-pointer">
-                        Lançar Entrada
                     </button>
                 </div>
-                
-                <!-- Micro List of custom entered receivables -->
-                <div class="pt-2">
-                    <p class="text-xs font-semibold text-slate-400 mb-2">Cronograma de Depósitos:</p>
-                    <div id="receivablesList" class="space-y-1.5 text-xs">
-                        <!-- Populated by JS -->
+
+                <!-- Menu de Navegação -->
+                <nav class="p-3 space-y-1">
+                    <a href="#" onclick="switchActiveView('dashboard')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 sidebar-nav-item" id="nav-dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
+                        </svg>
+                        <span class="sidebar-text truncate">Visão Geral</span>
+                    </a>
+
+                    <!-- Dropdown de Contas -->
+                    <div class="space-y-0.5">
+                        <button onclick="toggleContasDropdown()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 text-left cursor-pointer transition-colors" id="nav-contas-btn">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                                <span class="sidebar-text truncate">Contas</span>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform duration-200 sidebar-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="contasArrowIcon">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        
+                        <div id="contasDropdown" class="hidden pl-8 pr-2 py-1 space-y-1 overflow-hidden transition-all duration-300">
+                            <a href="#" onclick="switchActiveView('recebimentos')" class="block px-3 py-2 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white transition-colors" id="sub-recebimentos">• Recebimentos</a>
+                            <a href="#" onclick="switchActiveView('pagamentos')" class="block px-3 py-2 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white transition-colors" id="sub-pagamentos">• Pagamentos</a>
+                        </div>
                     </div>
-                </div>
+                </nav>
             </div>
 
-            <!-- Smart Box: Sugestão Estratégica de Pagamentos -->
-            <div class="lg:col-span-2 bg-indigo-950/20 border border-indigo-900/40 rounded-2xl p-6 flex flex-col justify-between">
-                <div>
-                    <div class="border-b border-indigo-900/40 pb-3 flex justify-between items-center">
-                        <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                            Sugestões de Pagamento Inteligentes
-                        </h3>
-                        <span class="text-[10px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-full">Cashflow Engine</span>
+            <!-- Rodapé da Sidebar (Configurações e Tema) -->
+            <div class="p-3 border-t border-slate-100 dark:border-slate-850 space-y-1">
+                <button onclick="toggleTheme()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer text-left">
+                    <div id="themeIconSlot" class="text-amber-500 dark:text-indigo-400 shrink-0"></div>
+                    <span class="sidebar-text truncate" id="themeTextLabel">Alternar Tema</span>
+                </button>
+
+                <a href="#" onclick="switchActiveView('configuracoes')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 sidebar-nav-item" id="nav-configuracoes">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="sidebar-text truncate">Configurações</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- ÁREA CENTRAL DE CONTEÚDO -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- Header Superior -->
+            <header class="border-b border-slate-200 dark:border-slate-850 bg-white/80 dark:bg-slate-900/80 backdrop-blur sticky top-0 z-30">
+                <div class="max-w-5xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h2 id="viewStageTitle" class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Visão Geral</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Planejamento e Finanças Inteligentes • 2026</p>
                     </div>
                     
-                    <div id="suggestionBox" class="mt-4 space-y-3 text-sm text-slate-300">
-                        <!-- Generated on-the-fly dynamically mapping against due-dates -->
+                    <!-- Filtro de Mês -->
+                    <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <label for="monthSelect" class="text-xs font-semibold px-2 text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mês:</label>
+                        <select id="monthSelect" onchange="updateDashboard(this.value)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1 text-sm font-semibold text-indigo-600 dark:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            <option value="JANUARY">Janeiro</option>
+                            <option value="FEBRUARY">Fevereiro</option>
+                            <option value="MARCH" selected>Março</option>
+                            <option value="APRIL">Abril</option>
+                            <option value="MAY">Maio</option>
+                            <option value="JUNE">Junho</option>
+                            <option value="JULY">Julho</option>
+                            <option value="AUGUST">Agosto</option>
+                            <option value="SEPTEMBER">Setembro</option>
+                            <option value="OCTOBER">Outubro</option>
+                            <option value="NOVEMBER">Novembro</option>
+                            <option value="DECEMBER">Dezembro</option>
+                        </select>
                     </div>
                 </div>
-                <p class="text-[11px] text-slate-500 mt-4 italic">As prioridades absolutas podem ser marcadas por você diretamente na lista de contas abaixo.</p>
-            </div>
-        </section>
+            </header>
 
-        <!-- Recurrent Bills Layout Breakdown Table -->
-        <section class="bg-slate-800/30 border border-slate-800/80 rounded-2xl overflow-hidden backdrop-blur-sm">
-            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-                <div>
-                    <h2 class="text-lg font-bold text-white">Detalhamento das Contas Recorrentes</h2>
-                    <p class="text-xs text-slate-400">Previsões fixas replicadas automaticamente para todos os meses</p>
+            <!-- Telas dinâmicas (Switched por JS) -->
+            <main class="max-w-5xl w-full mx-auto p-6 space-y-8 flex-1">
+                
+                <!-- TELA 1: VISÃO GERAL (DASHBOARD) -->
+                <div id="view-dashboard" class="space-y-8 app-view-stage">
+                    <!-- Cards de Resumo de KPIs -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-sm">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Entradas do Mês</p>
+                                    <h3 id="totalReceived" class="text-3xl font-bold mt-2 text-emerald-600 dark:text-emerald-400">R$ 0,00</h3>
+                                </div>
+                                <div class="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-sm">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-rose-500"></div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saídas Mapeadas</p>
+                                    <h3 id="totalBills" class="text-3xl font-bold mt-2 text-rose-600 dark:text-rose-400">R$ 0,00</h3>
+                                </div>
+                                <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-sm">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saldo Líquido</p>
+                                    <h3 id="monthlyBalance" class="text-3xl font-bold mt-2 text-indigo-600 dark:text-indigo-400">R$ 0,00</h3>
+                                </div>
+                                <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção de Ações Rápidas e Algoritmo -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Formulário de Recebíveis -->
+                        <div class="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
+                            <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-300 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    Menu de Recebíveis
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Registre entradas e datas de liquidação</p>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Descrição do Recebível</label>
+                                    <input type="text" id="incDesc" placeholder="Ex: Provento Gerência" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Valor (R$)</label>
+                                        <input type="number" id="incVal" placeholder="0.00" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Dia Liquidação</label>
+                                        <input type="number" id="incDay" placeholder="Ex: 5" min="1" max="31" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-indigo-500">
+                                    </div>
+                                </div>
+                                <button onclick="addReceivable()" class="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg transition-colors cursor-pointer shadow-sm">
+                                    Lançar Entrada
+                                </button>
+                            </div>
+                            
+                            <div class="pt-2">
+                                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Cronograma de Depósitos:</p>
+                                <div id="receivablesList" class="space-y-1.5 text-xs"></div>
+                            </div>
+                        </div>
+
+                        <!-- Engine de Sugestões de Pagamento -->
+                        <div class="lg:col-span-2 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 rounded-2xl p-6 flex flex-col justify-between shadow-sm">
+                            <div>
+                                <div class="border-b border-indigo-100 dark:border-indigo-900/40 pb-3 flex justify-between items-center">
+                                    <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                        </svg>
+                                        Sugestões de Pagamento Inteligentes
+                                    </h3>
+                                    <span class="text-[10px] bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 px-2 py-0.5 rounded-full font-medium">Engine v3.0</span>
+                                </div>
+                                <div id="suggestionBox" class="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300"></div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-4 italic">Organização recomendada com base em análise de fluxo temporal.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tabela Principal de Contas -->
+                    <div class="bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
+                        <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900 dark:text-white">Detalhamento das Contas Recorrentes</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Previsões fixas replicadas automaticamente para todos os meses</p>
+                            </div>
+                            <span class="px-2.5 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-700" id="itemCount">0 Itens</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                                        <th class="py-4 px-6">Descrição</th>
+                                        <th class="py-4 px-6 text-center">Vencimento Padrão</th>
+                                        <th class="py-4 px-6 text-right">Valor Projetado</th>
+                                        <th class="py-4 px-6 text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="billsTableBody" class="divide-y divide-slate-100 dark:divide-slate-850"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <span class="px-2.5 py-1 text-xs font-medium bg-slate-800 text-slate-300 rounded-full border border-slate-700" id="itemCount">9 Itens</span>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-800/40 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
-                            <th class="py-4 px-6">Descrição</th>
-                            <th class="py-4 px-6 text-center">Vencimento Padrão</th>
-                            <th class="py-4 px-6 text-right">Valor Projetado</th>
-                            <th class="py-4 px-6 text-center">Status / Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="billsTableBody" class="divide-y divide-slate-850">
-                        <!-- Injected by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
 
-    <footer class="max-w-6xl mx-auto px-4 py-8 mt-12 border-t border-slate-800 text-center text-xs text-slate-500">
-        <p>© 2026 • My Finance • Desenvolvido sob medida para Alexandre • Código Aberto no GitHub</p>
-    </footer>
+                <!-- TELA 2: RECEBIMENTOS (PLACEHOLDER) -->
+                <div id="view-recebimentos" class="hidden space-y-4 app-view-stage">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Painel de Recebimentos</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Esta tela expandida conterá gráficos de pizza, previsões anuais de bônus e fluxo de caixa consolidado.</p>
+                    </div>
+                </div>
 
+                <!-- TELA 3: PAGAMENTOS (PLACEHOLDER) -->
+                <div id="view-pagamentos" class="hidden space-y-4 app-view-stage">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Painel de Pagamentos</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Esta tela expandida conterá o painel de cadastro de novas contas fixas e marcas de priorização estratégica.</p>
+                    </div>
+                </div>
+
+                <!-- TELA 4: CONFIGURAÇÕES (PLACEHOLDER) -->
+                <div id="view-configuracoes" class="hidden space-y-4 app-view-stage">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Configurações do Sistema</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Espaço reservado para customização de chaves de segurança de login, parâmetros de cálculo e preferências do sistema.</p>
+                    </div>
+                </div>
+
+            </main>
+
+            <footer class="max-w-5xl w-full mx-auto px-6 py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400 dark:text-slate-500">
+                <p>© 2026 • My Finance • Desenvolvido sob medida para Alexandre • Hospedado via GitHub Pages</p>
+            </footer>
+        </div>
     </div>
 
-    <!-- Core App Engine and State Matrix -->
+    <!-- MOTOR DE CÓDIGO INTERATIVO (JAVASCRIPT) -->
     <script>
-        // Core Config & Memory Simulation (Persistent variables across state changes)
         let currentMonth = "MARCH";
-        
-        // Base Recurrent matrix replicated for all months automatically
+        let isSidebarCollapsed = false;
+        let isDropdownOpen = false;
+
+        // Base de Contas Recorrentes Fixas
         const baseRecurrentItems = [
             { id: "fin", name: "Financiamento", dueDay: 19, val: 1565.00 },
             { id: "cond", name: "Condomínio", dueDay: 10, val: 885.00 },
@@ -248,49 +334,147 @@
             { id: "c6", name: "C6", dueDay: 15, val: 0.00 }
         ];
 
-        // Unique structures for monthly overrides
         const monthlyData = {
-            "JANUARY": { received: 6370.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Padrão", val: 6370, day: 5}] },
-            "FEBRUARY": { received: 8840.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Padrão", val: 8840, day: 5}] },
-            "MARCH": { received: 7300.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Gerência", val: 7300, day: 5}] },
-            "APRIL": { received: 7800.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Base", val: 7800, day: 5}] },
-            "MAY": { received: 5750.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Ajustado", val: 5750, day: 5}] },
-            "JUNE": { received: 13107.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento + Bônus", val: 13107, day: 5}] }
+            "MARCH": { received: 7300.00, items: JSON.parse(JSON.stringify(baseRecurrentItems)), customIncomes: [{desc: "Provento Gerência", val: 7300, day: 5}] }
         };
 
-        // Initialize missing months from July to December cleanly with base templates
         const allMonths = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
         allMonths.forEach(m => {
             if(!monthlyData[m]) {
                 monthlyData[m] = {
-                    received: 7500.00, // standard base projection
+                    received: 7500.00,
                     items: JSON.parse(JSON.stringify(baseRecurrentItems)),
                     customIncomes: [{desc: "Provento Estimado", val: 7500, day: 5}]
                 };
             }
         });
 
-        // 1. Password Verification Logic (Local privacy guard)
+        // Verificação de Acesso Privado
         function checkAccess() {
             const pass = document.getElementById('accessPassword').value;
-            // Set simple secure local password for Alexandre (can easily be edited in code)
             if (pass === "1234" || pass.toLowerCase() === "alexandre") {
                 document.getElementById('loginOverlay').classList.add('opacity-0', 'pointer-events-none');
                 const container = document.getElementById('appContainer');
                 container.classList.remove('pointer-events-none', 'opacity-0');
                 container.classList.add('opacity-100');
+                
+                syncThemeUI();
                 updateDashboard(currentMonth);
             } else {
-                const err = document.getElementById('loginError');
-                err.classList.remove('hidden');
+                document.getElementById('loginError').classList.remove('hidden');
             }
         }
+
+        // Sistema de Controle de Sidebar Retrátil
+        function toggleSidebar() {
+            isSidebarCollapsed = !isSidebarCollapsed;
+            const sidebar = document.getElementById('sidebar');
+            const texts = document.querySelectorAll('.sidebar-text');
+            const logoZone = document.getElementById('sidebarLogoZone');
+            const icon = document.getElementById('sidebarCollapseIcon');
+
+            if(isSidebarCollapsed) {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-16');
+                logoZone.classList.add('opacity-0');
+                texts.forEach(t => t.classList.add('hidden'));
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />';
+                document.getElementById('contasDropdown').classList.add('hidden');
+            } else {
+                sidebar.classList.remove('w-16');
+                sidebar.classList.add('w-64');
+                setTimeout(() => {
+                    logoZone.classList.remove('opacity-0');
+                    texts.forEach(t => t.classList.remove('hidden'));
+                }, 100);
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />';
+                if(isDropdownOpen) document.getElementById('contasDropdown').classList.remove('hidden');
+            }
+        }
+
+        function toggleContasDropdown() {
+            if(isSidebarCollapsed) toggleSidebar();
+            isDropdownOpen = !isDropdownOpen;
+            const dropdown = document.getElementById('contasDropdown');
+            const arrow = document.getElementById('contasArrowIcon');
+            
+            if(isDropdownOpen) {
+                dropdown.classList.remove('hidden');
+                arrow.classList.add('rotate-180');
+            } else {
+                dropdown.classList.add('hidden');
+                arrow.classList.remove('rotate-180');
+            }
+        }
+
+        // Sistema de Roteamento de Páginas
+        function switchActiveView(viewId) {
+            document.querySelectorAll('.app-view-stage').forEach(v => v.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-nav-item').forEach(b => {
+                b.classList.remove('bg-indigo-50', 'text-indigo-600', 'dark:bg-indigo-950/40', 'dark:text-indigo-400');
+                b.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+            document.querySelectorAll('#contasDropdown a').forEach(a => {
+                a.classList.remove('text-indigo-500', 'dark:text-indigo-400', 'font-bold');
+                a.classList.add('text-slate-500', 'dark:text-slate-400');
+            });
+
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+
+            const viewTitles = {
+                'dashboard': 'Visão Geral',
+                'recebimentos': 'Contas > Recebimentos',
+                'pagamentos': 'Contas > Pagamentos',
+                'configuracoes': 'Configurações do Sistema'
+            };
+            document.getElementById('viewStageTitle').innerText = viewTitles[viewId] || 'My Finance';
+
+            if(viewId === 'dashboard' || viewId === 'configuracoes') {
+                const activeBtn = document.getElementById(`nav-${viewId}`);
+                activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+                activeBtn.classList.add('bg-indigo-50', 'text-indigo-600', 'dark:bg-indigo-950/40', 'dark:text-indigo-400');
+            } else if(viewId === 'recebimentos' || viewId === 'pagamentos') {
+                const subItem = document.getElementById(`sub-${viewId}`);
+                subItem.classList.remove('text-slate-500', 'dark:text-slate-400');
+                subItem.classList.add('text-indigo-500', 'dark:text-indigo-400', 'font-bold');
+            }
+        }
+
+        // Motor de Alternância de Tema (Claro / Escuro)
+        function toggleTheme() {
+            const html = document.documentElement;
+            if(html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('myfinance-theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('myfinance-theme', 'dark');
+            }
+            syncThemeUI();
+        }
+
+        function syncThemeUI() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const iconSlot = document.getElementById('themeIconSlot');
+            const label = document.getElementById('themeTextLabel');
+
+            if(isDark) {
+                iconSlot.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>`;
+                label.innerText = "Modo Claro";
+            } else {
+                iconSlot.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 118.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`;
+                label.innerText = "Modo Escuro";
+            }
+        }
+
+        // Aplicação imediata do tema salvo antes da renderização
+        const savedTheme = localStorage.getItem('myfinance-theme');
+        if(savedTheme === 'light') document.documentElement.classList.remove('dark');
 
         function formatCurrency(value) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
         }
 
-        // 2 & 3. Add Custom Receivable Dynamic Engine
         function addReceivable() {
             const desc = document.getElementById('incDesc').value || "Nova Entrada";
             const val = parseFloat(document.getElementById('incVal').value) || 0;
@@ -300,12 +484,10 @@
 
             monthlyData[currentMonth].customIncomes.push({ desc, val, day });
             
-            // Recompute dynamic total received for the active month
             let totalRec = 0;
             monthlyData[currentMonth].customIncomes.forEach(i => totalRec += i.val);
             monthlyData[currentMonth].received = totalRec;
 
-            // Clear inputs
             document.getElementById('incDesc').value = "";
             document.getElementById('incVal').value = "";
             document.getElementById('incDay').value = "";
@@ -313,7 +495,6 @@
             updateDashboard(currentMonth);
         }
 
-        // 3. Main Algorithmic Cashflow Advisor
         function compilePaymentSuggestions(monthKey) {
             const data = monthlyData[monthKey];
             const suggestionBox = document.getElementById('suggestionBox');
@@ -324,104 +505,83 @@
                 return;
             }
 
-            // Sort incomes by day
             const sortedIncomes = [...data.customIncomes].sort((a,b) => a.day - b.day);
-            // Sort bills by due date
             const sortedBills = [...data.items].sort((a,b) => a.dueDay - b.dueDay);
 
             let html = `<ul class="space-y-3">`;
-
             sortedIncomes.forEach(inc => {
-                // Find bills that mature AFTER or near this income day, but before the next income
                 const matchedBills = sortedBills.filter(b => b.dueDay >= inc.day && b.val > 0);
-                
                 html += `
-                    <li class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60">
-                        <div class="flex justify-between items-center text-xs font-bold text-slate-200">
-                            <span class="text-emerald-400">💵 Recebimento: ${inc.desc} (Dia ${inc.day})</span>
+                    <li class="bg-white dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200 dark:border-slate-800/60">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-200">
+                            <span class="text-emerald-600 dark:text-emerald-400">💵 Recebimento: ${inc.desc} (Dia ${inc.day})</span>
                             <span>Disponível: ${formatCurrency(inc.val)}</span>
                         </div>
-                        <div class="mt-2 pl-3 border-l-2 border-indigo-500/40 space-y-1 text-xs text-slate-400">
+                        <div class="mt-2 pl-3 border-l-2 border-indigo-500/40 space-y-1 text-xs text-slate-500 dark:text-slate-400">
                 `;
-
                 if(matchedBills.length > 0) {
                     let allocated = 0;
                     matchedBills.forEach(b => {
                         if(allocated + b.val <= inc.val) {
-                            html += `<div>• Liquidar <strong class="text-slate-300">${b.name}</strong> até o vencimento em <span class="text-indigo-300">Dia ${b.dueDay}</span> (${formatCurrency(b.val)})</div>`;
+                            html += `<div>• Liquidar <strong class="text-slate-700 dark:text-slate-300">${b.name}</strong> até o vencimento em <span class="text-indigo-600 dark:text-indigo-300 font-medium">Dia ${b.dueDay}</span> (${formatCurrency(b.val)})</div>`;
                             allocated += b.val;
                         }
                     });
                 } else {
-                    html += `<div class="text-slate-500 italic">Nenhum boleto vencendo imediatamente após este lote. Fundo de reserva livre.</div>`;
+                    html += `<div class="text-slate-400 dark:text-slate-500 italic">Nenhum boleto vencendo imediatamente após este lote. Fundo de reserva livre.</div>`;
                 }
-
                 html += `</div></li>`;
             });
-
             html += `</ul>`;
             suggestionBox.innerHTML = html;
         }
 
-        // Render dashboard dynamically matching states
         function updateDashboard(monthKey) {
             currentMonth = monthKey;
             const data = monthlyData[monthKey];
             if (!data) return;
 
-            // Compute math metrics
             let totalBills = 0;
             data.items.forEach(item => totalBills += item.val);
             const balance = data.received - totalBills;
 
-            // Paint Top Metrics Widgets
             document.getElementById('totalReceived').innerText = formatCurrency(data.received);
             document.getElementById('totalBills').innerText = formatCurrency(totalBills);
             
             const balanceEl = document.getElementById('monthlyBalance');
             balanceEl.innerText = formatCurrency(balance);
-            balanceEl.className = balance >= 0 ? "text-3xl font-bold mt-2 text-indigo-400" : "text-3xl font-bold mt-2 text-rose-400";
+            balanceEl.className = balance >= 0 ? "text-3xl font-bold mt-2 text-indigo-600 dark:text-indigo-400" : "text-3xl font-bold mt-2 text-rose-600 dark:text-rose-400";
 
-            // Repopulate active custom receivables micro dashboard
             const recListEl = document.getElementById('receivablesList');
             recListEl.innerHTML = "";
             data.customIncomes.forEach(inc => {
                 const d = document.createElement('div');
-                d.className = "flex justify-between text-slate-300 bg-slate-900/30 px-2 py-1 rounded border border-slate-800";
-                d.innerHTML = `<span>${inc.desc} (Dia ${inc.day})</span><span class="font-semibold text-emerald-400">${formatCurrency(inc.val)}</span>`;
+                d.className = "flex justify-between text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/30 px-2 py-1 rounded border border-slate-200 dark:border-slate-800";
+                d.innerHTML = `<span>${inc.desc} (Dia ${inc.day})</span><span class="font-semibold text-emerald-600 dark:text-emerald-400">${formatCurrency(inc.val)}</span>`;
                 recListEl.appendChild(d);
             });
 
-            // Update Bills Breakdown Grid
             const tbody = document.getElementById('billsTableBody');
             tbody.innerHTML = "";
-            
             data.items.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors text-xs";
-                
+                tr.className = "border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/20 transition-colors text-xs";
                 const isZero = item.val === 0;
-
                 tr.innerHTML = `
-                    <td class="py-4 px-6 font-medium text-slate-200 text-sm">${item.name}</td>
-                    <td class="py-4 px-6 text-center text-slate-400">Dia ${item.dueDay}</td>
-                    <td class="py-4 px-6 text-right font-semibold text-sm ${isZero ? 'text-slate-600' : 'text-slate-200'}">${formatCurrency(item.val)}</td>
+                    <td class="py-4 px-6 font-medium text-slate-800 dark:text-slate-200 text-sm">${item.name}</td>
+                    <td class="py-4 px-6 text-center text-slate-500 dark:text-slate-400">Dia ${item.dueDay}</td>
+                    <td class="py-4 px-6 text-right font-semibold text-sm ${isZero ? 'text-slate-400 dark:text-slate-600' : 'text-slate-800 dark:text-slate-200'}">${formatCurrency(item.val)}</td>
                     <td class="py-4 px-6 text-center">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                            Mapeado
-                        </span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">Ativo</span>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
 
             document.getElementById('itemCount').innerText = `${data.items.length} Contas`;
-            
-            // Build dynamic flow calculation engine suggestion
             compilePaymentSuggestions(monthKey);
         }
 
-        // Setup simple keypress listener for login convenience
         document.getElementById('accessPassword').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') checkAccess();
         });
